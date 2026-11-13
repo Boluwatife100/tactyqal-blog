@@ -8,6 +8,7 @@ export type PostSummary = {
   title: string;
   excerpt: string;
   coverImage: string | null;
+  status: "DRAFT" | "PUBLISHED";
   readTimeMin: number;
   publishedAt: string | null;
   category: Term | null;
@@ -32,7 +33,12 @@ async function get<T>(path: string): Promise<T | null> {
   return res.json() as Promise<T>;
 }
 
-export async function getPosts(params: { page?: number; q?: string; category?: string; limit?: number }) {
+export async function getPosts(params: {
+  page?: number;
+  q?: string;
+  category?: string;
+  limit?: number;
+}) {
   const qs = new URLSearchParams();
   if (params.page) qs.set("page", String(params.page));
   if (params.limit) qs.set("limit", String(params.limit));
@@ -41,11 +47,18 @@ export async function getPosts(params: { page?: number; q?: string; category?: s
   return (await get<PostList>(`/api/posts?${qs}`))!;
 }
 
-export const getPost = (slug: string) => get<Post>(`/api/posts/${encodeURIComponent(slug)}`);
+export const getPost = (slug: string) =>
+  get<Post>(`/api/posts/${encodeURIComponent(slug)}`);
 
 export async function getCategories() {
   return (await get<(Term & { postCount: number })[]>("/api/categories")) ?? [];
 }
 
 export const formatDate = (iso: string | null) =>
-  iso ? new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric" }) : "";
+  iso
+    ? new Date(iso).toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      })
+    : "";
